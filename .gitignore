@@ -4,6 +4,5 @@ Lib/
 Scripts/
 share/
 pyvenv.cfg
-
-# Mengabaikan folder data opsional jika diperlukan
 data/
+videos/

@@ -51,9 +51,38 @@ def prompt_session_info() -> tuple[str, str]:
     return participant_id, session_id
 
 
-def print_label_legend():
+def prompt_input_source():
+    """
+    Menanyakan operator: pakai kamera live atau file video yang sudah ada.
+
+    Returns:
+        (source, is_testing) — source adalah 0 (kamera) atau path string
+        ke file video; is_testing True jika operator memilih mode "testing
+        pipeline tanpa label pasti" (lihat settings.TESTING_LABEL).
+    """
+    print("\n=== Sumber Input ===")
+    print("  [1] Kamera live")
+    print("  [2] File video yang sudah ada")
+    choice = input("Pilih sumber (1/2): ").strip()
+
+    if choice == "2":
+        path = input("Masukkan path file video: ").strip()
+        print("\nApakah Anda sudah tahu label stres untuk video ini secara pasti?")
+        print("  [y] Ya, saya akan tentukan/ganti label seperti biasa (tombol 1/2/3)")
+        print("  [n] Belum, ini hanya untuk testing pipeline (label = 'Unlabeled')")
+        knows_label = input("Jawaban (y/n): ").strip().lower()
+        is_testing = knows_label != "y"
+        return path, is_testing
+
+    return 0, False
+
+
+def print_label_legend(show_window: bool = True, current_label: str = None):
     print("\n=== Kontrol Label Stres ===")
     for key, label in settings.STRESS_LABELS.items():
         print(f"  Tekan [{key}] -> {label}")
-    print(f"  Label awal: {settings.DEFAULT_LABEL}")
-    print("  Tekan [ESC] untuk berhenti merekam.\n")
+    print(f"  Label awal: {current_label or settings.DEFAULT_LABEL}")
+    if show_window:
+        print("  Tekan [ESC] untuk berhenti merekam.\n")
+    else:
+        print("  (Jendela tampilan dimatikan — proses berjalan sampai sumber video selesai.)\n")

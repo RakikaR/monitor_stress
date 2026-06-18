@@ -36,6 +36,11 @@ STRESS_LABELS = {
 }
 DEFAULT_LABEL = "Rileks"
 
+# Dipakai saat memproses video uji coba yang belum punya label pasti
+# (lihat main.py mode "file video" / testing pipeline). Data dengan
+# label ini sebaiknya TIDAK dicampur ke dataset training final.
+TESTING_LABEL = "Unlabeled"
+
 # ── Indeks Landmark Wajah (MediaPipe Face Mesh, 478 titik) ─────────
 # Indeks dikonfirmasi sesuai konvensi resmi MediaPipe:
 # 33 = sudut luar mata kiri, 263 = sudut luar mata kanan, 1 = ujung hidung.
