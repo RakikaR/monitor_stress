@@ -1,0 +1,9 @@
+# Mengabaikan folder virtual environment di folder utama
+Include/
+Lib/
+Scripts/
+share/
+pyvenv.cfg
+
+# Mengabaikan folder data opsional jika diperlukan
+data/
