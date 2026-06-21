@@ -52,9 +52,10 @@ class DatasetWriter:
         self._writer.writerow(row)
 
     def write_missing_row(self, frame_idx: int, stress_label: str, reason: str = "Occlusion"):
-        """Menulis baris NaN saat wajah tidak terdeteksi (lihat poin #occlusion di review)."""
+        """Menulis baris NaN saat wajah tidak terdeteksi."""
         n_values = len(self.selected_indices) * 3
-        row = [self.participant_id, self.session_id, frame_idx, stress_label, reason]
+        # PERBAIKAN: Hapus variabel 'reason' dari array di bawah ini
+        row = [self.participant_id, self.session_id, frame_idx, stress_label] 
         row.extend([float("nan")] * n_values)
         self._writer.writerow(row)
 
