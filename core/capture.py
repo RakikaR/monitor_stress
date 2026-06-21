@@ -46,7 +46,7 @@ def build_face_landmarker():
         num_faces=settings.NUM_FACES,
         min_face_detection_confidence=settings.MIN_FACE_DETECTION_CONFIDENCE,
         min_tracking_confidence=settings.MIN_TRACKING_CONFIDENCE,
-        output_face_blendshapes=True,
+        output_face_blendshapes=False, # <--- PERBAIKAN DI SINI (Ubah menjadi False)
     )
     return FaceLandmarker.create_from_options(options)
 
@@ -128,7 +128,6 @@ def run_capture_session(participant_id: str, session_id: str, source=0,
     if allow_manual_relabel:
         print_label_legend(show_window=show_window, current_label=session.current_label)
 
-    p_time = 0.0
     ms_per_frame = 1000.0 / fps if not is_live else None
 
     try:
