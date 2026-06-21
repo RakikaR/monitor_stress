@@ -32,7 +32,6 @@ import mediapipe as mp
 from config import settings
 from core.dataset_writer import DatasetWriter
 from core.session import SessionState, print_label_legend
-from utils.expression import classify_expression
 from utils.normalization import normalize_landmarks
 
 BaseOptions = mp.tasks.BaseOptions
@@ -156,47 +155,29 @@ def run_capture_session(participant_id: str, session_id: str, source=0,
                 result = face_landmarker.detect_for_video(mp_image, timestamp_ms)
 
                 h, w = frame.shape[:2]
-                expression = "Netral"
-                expr_color = (0, 0, 255)
 
                 if result.face_landmarks:
                     landmarks = result.face_landmarks[0]
                     draw_overlay(frame, landmarks, w, h, settings.DRAW_ALL_LANDMARKS)
-
-                    if result.face_blendshapes:
-                        expression, expr_color = classify_expression(result.face_blendshapes[0])
 
                     try:
                         norm_result = normalize_landmarks(landmarks)
                         writer.write_row(
                             frame_idx=session.frame_count,
                             stress_label=session.current_label,
-                            expression=expression,
                             feature_values=norm_result.values,
                         )
                     except (IndexError, ZeroDivisionError) as e:
                         print(f"[Peringatan] Gagal menormalisasi frame {session.frame_count}: {e}")
                 else:
-                    expression = "Occlusion"
-                    expr_color = (100, 100, 100)
                     writer.write_missing_row(
                         frame_idx=session.frame_count,
                         stress_label=session.current_label,
                     )
-
+                
                 if show_window:
-                    cv2.putText(frame, f"Label Stres: {session.current_label}", (10, 45),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
-                    cv2.putText(frame, f"Ekspresi: {expression}", (10, 80),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.9, expr_color, 2)
-
-                    c_time = time.time()
-                    fps_display = 1 / (c_time - p_time) if p_time else 0
-                    p_time = c_time
-                    cv2.putText(frame, f"FPS: {int(fps_display)}", (10, 115),
-                                cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 255), 2)
-
                     cv2.imshow(settings.WINDOW_TITLE, frame)
+                
 
                 session.tick()
 

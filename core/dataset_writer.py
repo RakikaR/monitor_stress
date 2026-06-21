@@ -30,7 +30,7 @@ class DatasetWriter:
         self._writer = None
 
     def _build_header(self):
-        header = ["participant_id", "session_id", "frame_idx", "class", "expression"]
+        header = ["participant_id", "session_id", "frame_idx", "class"]
         for idx in self.selected_indices:
             header += [f"x{idx}", f"y{idx}", f"z{idx}"]
         return header
@@ -45,9 +45,9 @@ class DatasetWriter:
             self._writer.writerow(self._build_header())
         return self
 
-    def write_row(self, frame_idx: int, stress_label: str, expression: str, feature_values):
+    def write_row(self, frame_idx: int, stress_label: str, feature_values):
         """Menulis satu baris data (satu frame)."""
-        row = [self.participant_id, self.session_id, frame_idx, stress_label, expression]
+        row = [self.participant_id, self.session_id, frame_idx, stress_label]
         row.extend(feature_values)
         self._writer.writerow(row)
 

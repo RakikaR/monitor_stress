@@ -60,7 +60,7 @@ def build_sliding_windows(df: pd.DataFrame, window_size=None, step_size=None):
 
     feature_cols = [
         c for c in df.columns
-        if c not in ("participant_id", "session_id", "frame_idx", "class", "expression")
+        if c not in ("participant_id", "session_id", "frame_idx", "class")
     ]
 
     X_sequences, y_sequences = [], []

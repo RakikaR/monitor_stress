@@ -62,16 +62,6 @@ MIN_FACE_DETECTION_CONFIDENCE = 0.5
 MIN_TRACKING_CONFIDENCE = 0.5
 NUM_FACES = 1
 
-# ── Threshold Klasifikasi Ekspresi (HANYA untuk overlay visual,
-#    BUKAN dipakai sebagai label training — lihat code review) ─────
-EXPR_THRESHOLDS = {
-    "jaw_open": 0.3,
-    "brow_inner_up": 0.3,
-    "eye_blink": 0.4,
-    "mouth_smile": 0.45,
-    "mouth_frown": 0.1,
-}
-
 # ── Sliding Window untuk TCN ────────────────────────────────────────
 WINDOW_SIZE = 90   # ~3 detik pada 30 FPS
 STEP_SIZE = 30     # overlap 66%
