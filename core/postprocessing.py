@@ -51,9 +51,6 @@ def impute_missing(df: pd.DataFrame) -> pd.DataFrame:
 def build_sliding_windows(df: pd.DataFrame, window_size=None, step_size=None):
     """
     Membentuk tensor 3D (Batch, Timesteps, Features) untuk TCN.
-
-    Window dibentuk per (participant_id, session_id) secara terpisah
-    sehingga tidak ada window yang mencampur dua sesi berbeda.
     """
     window_size = window_size or settings.WINDOW_SIZE
     step_size = step_size or settings.STEP_SIZE
@@ -65,8 +62,15 @@ def build_sliding_windows(df: pd.DataFrame, window_size=None, step_size=None):
 
     X_sequences, y_sequences = [], []
     skipped_groups = []
+    nan_groups = [] # Untuk mencatat sesi yang error karena NaN
 
     for (pid, sid), group in df.groupby(["participant_id", "session_id"]):
+        
+        # CEGAH NaN MASUK KE TENSOR (Mencegah Model Rusak)
+        if group[feature_cols].isna().any().any():
+            nan_groups.append((pid, sid))
+            continue # Lewati sesi ini secara keseluruhan
+
         group = group.sort_values("frame_idx")
         features = group[feature_cols].values
         labels = group["class"].values
@@ -86,6 +90,12 @@ def build_sliding_windows(df: pd.DataFrame, window_size=None, step_size=None):
             X_sequences.append(window_features)
             y_sequences.append(majority_label)
 
+    # Cetak laporan penghapusan data
+    if nan_groups:
+        print(f"[Peringatan] {len(nan_groups)} sesi dibuang karena tertutup total (masih mengandung NaN):")
+        for pid, sid in nan_groups:
+            print(f"  - {pid}/{sid}")
+
     if skipped_groups:
         print(f"[Peringatan] {len(skipped_groups)} sesi dilewati karena terlalu pendek (< {window_size} frame):")
         for pid, sid, n in skipped_groups:
@@ -93,14 +103,25 @@ def build_sliding_windows(df: pd.DataFrame, window_size=None, step_size=None):
 
     if not X_sequences:
         raise ValueError(
-            f"Tidak ada window yang terbentuk. Semua sesi lebih pendek dari "
-            f"WINDOW_SIZE={window_size}. Rekam sesi lebih panjang atau kecilkan WINDOW_SIZE."
+            f"Tidak ada window yang terbentuk. Pastikan data tidak semuanya berisi NaN, "
+            f"dan sesi lebih panjang dari WINDOW_SIZE={window_size}."
         )
 
-    X_tensor = np.array(X_sequences, dtype=np.float32)
-    y_tensor = np.array(y_sequences)
-    return X_tensor, y_tensor
+    # LABEL ENCODING (Ubah String jadi Integer agar TCN bisa baca)
+    label_map = {
+        "Rileks": 0,
+        "Stres_Ringan": 1,
+        "Stres_Berat": 2,
+        "Unlabeled": -1  # Data unlabeled bisa diabaikan nanti saat training
+    }
+    
+    # Konversi teks menjadi angka
+    y_encoded_list = [label_map.get(lbl, -1) for lbl in y_sequences]
 
+    X_tensor = np.array(X_sequences, dtype=np.float32)
+    y_tensor = np.array(y_encoded_list, dtype=np.int64)
+    
+    return X_tensor, y_tensor
 
 def run_post_processing(csv_path=None):
     csv_path = csv_path or settings.DATASET_CSV
